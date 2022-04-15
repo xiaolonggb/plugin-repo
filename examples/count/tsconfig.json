@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "jsx": "react",
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+
+    /* Language and Environment */
+    "target": "ES2015",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Emit */
+    "declaration": true,
+
+    /* Modules */
+    "module": "ES2015",
+    "moduleResolution": "node",
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    /* Type Checking */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+
+    /* Completeness */
+    "skipLibCheck": true
+  },
+  "include": ["./src/**/*", "__test__/**/*", "app.ts"]
+}
