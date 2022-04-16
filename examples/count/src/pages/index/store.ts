@@ -1,9 +1,5 @@
-import { effects, namespace, makeObservable, observable, action, create } from '../../../../../es/index';
-
-type Action = {
-  type: 'nihao',
-  payload: any
-}
+import { effects, namespace, makeObservable, observable, action } from 'saga-mobx';
+import type { AnyAction, EffectsCommandMap } from 'saga-mobx';
 
 const delay = (ms: number) => new Promise((resolve, reject) => {
   setTimeout(() => {
@@ -26,12 +22,13 @@ class Store {
     this.value = value;
   }
   
-  @effects()
-  *test() {
+  @effects('poll', {delay: 1000})
+  *test(action: AnyAction) {
+    console.log(action);
     yield new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         resolve();
-      }, 1000)
+      }, 3000)
     })
     this.changeValue(this.value + 1);
   }
@@ -53,23 +50,16 @@ class Store1 {
 
   // 注册一个effect
   @effects()
-  *test2({ payload }, { put, call }) {
+  *test2({ payload }: AnyAction, { put, call }: EffectsCommandMap) {
     console.log('payload', payload)
-    console.log('zhixingle!!')
     this.changeValue(this.value + 1);
   }
 
   @effects()
-  *test1({ payload }: Action, { put, call, select }) {
-    // 怎么这么牛逼呢
-    // 风霜寂寞，掉落在你的怀中，人生风景在游走，每当孤独我停留，不远地方等着我，岁月如旧在穿梭
-    const storeOne: {changeValue: Function } = yield select((stores: any) => stores.storeOne);
-    storeOne.changeValue(5);
-    console.log('store', store)
-    console.log('payload', payload)
+  *test1({ payload }: AnyAction, { put, call, select }: EffectsCommandMap) {
     const count: number = yield call(delay, 2000);
     yield put({type: 'test2', payload: {commit: 1}});
-    return 'resr';
+    return count;
   }
 }
 // 风霜寂寞，掉落在你的怀中

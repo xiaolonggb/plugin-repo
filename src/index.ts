@@ -15,6 +15,24 @@ type EffectOpt = {
   type: string;
   options?: object;
 }
+type EffectType = 'takeEvery' | 'takeLeading' | 'debounce' | 'poll' | 'takeLatest' | 'watcher' | 'throttle';
+
+interface Action<T = any> {
+  type: T
+}
+export interface AnyAction extends Action<string> {
+  // Allows any extra properties to be defined in an action.
+  [extraProps: string]: any
+}
+
+export interface EffectsCommandMap {
+  put: <A extends AnyAction>(action: A) => any,
+  call: Function,
+  select: Function,
+  take: Function,
+  cancel: Function,
+  [key: string]: any,
+}
 
 function namespace(namespace) {
   return function(target) {
@@ -22,7 +40,7 @@ function namespace(namespace) {
   }
 }
 
-function effects(type: string = 'takeEvery', options?: null | object) {
+function effects(type: EffectType = 'takeEvery', options?: null | object) {
   const effectOpt: EffectOpt = { type };
   if (isPlainObject(options)) {
     effectOpt.options = options;
