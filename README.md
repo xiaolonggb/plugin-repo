@@ -21,7 +21,7 @@ const getCountUrl = () => {
   })
 }
 
-@namespace('testStore')
+@namespace('countStore')
 class Store {
   constructor() {
     makeObservable(this)
@@ -48,6 +48,22 @@ export default store;
 
 注册saga
 ```javascript
+import React from 'react'
+import { Provider, create } from 'saga-mobx';
+import App from './app';
+import store from './store'
+const app = create();
+app.registeredEffects(store);
+
+React.render(
+  <Provider {...app.getStore()}>
+    <App />
+  </Provider>
+, document.getElementById('#root'));
+```
+
+注册saga
+```javascript
 import { create } from 'saga-mobx';
 import store from './store'
 const app = create();
@@ -59,15 +75,14 @@ app.registeredEffects(store);
 import { dispatch, observer, inject } from 'saga-mobx'
 
 const App = (props: any) => {
-  const { testStore } = props;
-  const loadingStore = props.loading;
+  const { countStore } = props;
   return <>
-    <a javascript="void(0);" onClick={() => dispatch({type: 'testStore/test'})}>获取次数</a>
-    <p>次数, { testStore.count }</p>
+    <a javascript="void(0);" onClick={() => dispatch({type: 'countStore/getCount'})}>获取次数</a>
+    <p>次数, { countStore.count }</p>
   </>
 };
 
-export default inject('testStore')(observer(App));
+export default inject('countStore')(observer(App));
 ```
 
 ### 内置异步流处理方案
@@ -120,15 +135,39 @@ poll
 
 接收开始指令后，间隔800ms,自动调用一次getCount，接受结束指令后，终止调用
 ```javascript
-@effect('poll', {delayMs: 800})
+@effect('poll', {delay: 800})
 *getCount({ paylod }, { call }) {
   const count = yield call(getCountUrl);
   this.changeCount(count);
 }
 
 // 触发
-// dispatch({type: 'testStore/getCount-start'});
+// dispatch({type: 'countStore/getCount-start'});
 
 // 结束
-// // dispatch({type: 'testStore/getCount-end'});
+// // dispatch({type: 'countStore/getCount-end'});
+```
+
+### loading状态管理
+
+开启
+```javascript
+import createLoading from 'saga-mobx/plugins/loading'
+
+app.use(createLoading());
+```
+
+使用
+```javascript
+import {inject, observer} from 'saga-mobx'
+const App = () => {
+  const { countStore } = props;
+  const loadingStore = props.loading;
+  return <>
+    <a javascript="void(0);" onClick={() => dispatch({type: 'countStore/getCount'})}>获取次数</a>
+    { loadingStore.effects['countStore/getCount'] ? '获取中...' : <p>次数, { countStore.count }</p>}
+  </>
+}
+
+export default inject('loading')(observer(App));
 ```
