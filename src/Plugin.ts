@@ -15,11 +15,12 @@ export function filterHooks(obj) {
 
 export default class Plugin {
   constructor() {
-    this.hooks = hooks.reduce((memo, key) => {
-      memo[key] = [];
-      return memo;
-    }, {});
   }
+
+  hooks = hooks.reduce((memo, key) => {
+    memo[key] = [];
+    return memo;
+  }, {});
 
   use(stores, plugin) {
     invariant(
