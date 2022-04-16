@@ -7,10 +7,7 @@ import {
   effects as effectsFn,
 } from "../../index";
 
-const SHOW = "@@loading/show";
-const HIDE = "@@loading/hide";
-const NAMESPACE = "@@loading";
-
+const NAMESPACE = "loading";
 @namespaceFn(NAMESPACE)
 class Store {
   constructor() {
@@ -21,7 +18,7 @@ class Store {
   @observable effects: any = {};
 
   @action
-  show({ type, payload }) {
+  show({ payload }) {
     const { namespace, actionType } = payload || {};
     this.global = true;
     this.models = { ...this.models, [namespace]: true };
@@ -29,7 +26,7 @@ class Store {
   }
 
   @action
-  hide({ type, payload }) {
+  hide({ payload }) {
     const { namespace, actionType } = payload || {};
     const effects = { ...this.effects, [actionType]: false };
     const models = {
@@ -66,9 +63,9 @@ function createLoading(opts: { only?: any[]; except?: any[] } = {}) {
       (except.length > 0 && except.indexOf(actionType) === -1)
     ) {
       return function*(...args) {
-        loadingStore.show({ type: SHOW, payload: { namespace, actionType } });
+        loadingStore.show({ payload: { namespace, actionType } });
         yield effect(...args);
-        loadingStore.hide({ type: HIDE, payload: { namespace, actionType } });
+        loadingStore.hide({ payload: { namespace, actionType } });
       };
     } else {
       return effect;

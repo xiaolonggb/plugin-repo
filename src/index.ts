@@ -7,8 +7,14 @@ import {
 } from "@redux-saga/core";
 import getSaga from './getSaga';
 import Plugin from './Plugin';
-import invariant from 'invariant'
+import invariant from 'invariant';
+import { isPlainObject } from './utils';
 import { effectSymbol, namespaceSymbol } from './constants';
+
+type EffectOpt = {
+  type: string;
+  options?: object;
+}
 
 function namespace(namespace) {
   return function(target) {
@@ -16,9 +22,13 @@ function namespace(namespace) {
   }
 }
 
-function effects(options: {type: string} = {type: 'takeEvery'}) {
+function effects(type: string = 'takeEvery', options?: null | object) {
+  const effectOpt: EffectOpt = { type };
+  if (isPlainObject(options)) {
+    effectOpt.options = options;
+  }
   return function(target, key, des) {
-    des.value[effectSymbol]= options;
+    des.value[effectSymbol]= {type, options};
     return {
       ...des,
       enumerable: true

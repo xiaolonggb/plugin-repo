@@ -3,6 +3,7 @@ import warning from 'warning';
 import * as sagaEffects from 'redux-saga/effects';
 import { NAMESPACE_SEP, namespaceSymbol, effectSymbol } from './constants';
 import prefixType from './prefixType';
+import { delay } from './utils';
 
 export default function getSaga(store, onError, onEffect) {
   return function*() {
@@ -22,31 +23,27 @@ export default function getSaga(store, onError, onEffect) {
 }
 
 function getWatcher(key, _effect, store, onError, onEffect) {
-  let opts = _effect[effectSymbol];
+  let effectOpts = _effect[effectSymbol];
   let effect = _effect.bind(store);
-  let type = 'takeEvery';
+  let type = effectOpts.type;
   let ms;
   let delayMs;
 
-  // if (Array.isArray(_effect)) {
-  //   [effect] = _effect;
-  //   const opts = _effect[1];
-  //   if (opts && opts.type) {
-  //     ({ type } = opts);
-  //     if (type === 'throttle') {
-  //       invariant(opts.ms, 'app.start: opts.ms should be defined if type is throttle');
-  //       ({ ms } = opts);
-  //     }
-  //     if (type === 'poll') {
-  //       invariant(opts.delay, 'app.start: opts.delay should be defined if type is poll');
-  //       ({ delay: delayMs } = opts);
-  //     }
-  //   }
-  //   invariant(
-  //     ['watcher', 'takeEvery', 'takeLatest', 'throttle', 'poll'].indexOf(type) > -1,
-  //     'app.start: effect type should be takeEvery, takeLatest, throttle, poll or watcher',
-  //   );
-  // }
+  if (effectOpts.options) {
+    const options = effectOpts.options;
+    if (type === 'debounce' || type === 'throttle') {
+      invariant(options.ms, `${type}: options.ms should be defined`);
+      ({ ms } = options);
+    }
+    if (type === 'poll') {
+      invariant(options.delay, `${type}: options.delay should be defined`);
+      ({ delay: delayMs } = options);
+    }
+    invariant(
+      ['watcher', 'takeLeading', 'takeEvery', 'takeLatest', 'debounce', 'throttle', 'poll'].indexOf(type) > -1,
+      'effectOpts: effect type should be takeEvery, takeLatest, throttle, poll, watcher, takeLeading or debounce',
+    );
+  }
 
   function noop() {}
 
@@ -55,7 +52,7 @@ function getWatcher(key, _effect, store, onError, onEffect) {
       args.length > 0 ? args[0] : {};
     try {
       yield sagaEffects.put({ type: `${key}${NAMESPACE_SEP}@@start` });
-      const ret = yield effect(...args.concat(createEffects(store, opts)));
+      const ret = yield effect(...args.concat(createEffects(store, effectOpts)));
       yield sagaEffects.put({ type: `${key}${NAMESPACE_SEP}@@end` });
       resolve(ret);
     } catch (e) {
@@ -74,19 +71,36 @@ function getWatcher(key, _effect, store, onError, onEffect) {
   switch (type) {
     case 'watcher':
       return sagaWithCatch;
+    case 'takeLeading':
+      return function*() {
+        yield sagaEffects.takeLeading(key, sagaWithOnEffect);
+      }
     case 'takeLatest':
       return function*() {
         yield sagaEffects.takeLatest(key, sagaWithOnEffect);
       };
+    case 'debounce':
+      const { leading = true } = effectOpts.options;
+      if (leading) {
+        return function*() {
+          while(true){
+            const action = yield sagaEffects.take(key);
+            yield sagaEffects.fork(function* (){
+              yield sagaEffects.call(sagaWithOnEffect, action);
+            })
+            yield delay(ms);
+          }
+        };
+      }
+      return function* () {
+        yield sagaEffects.debounce(ms, key, sagaWithOnEffect);
+      }
     case 'throttle':
       return function*() {
         yield sagaEffects.throttle(ms, key, sagaWithOnEffect);
       };
     case 'poll':
       return function*() {
-        function delay(timeout) {
-          return new Promise(resolve => setTimeout(resolve, timeout));
-        }
         function* pollSagaWorker(sagaEffects, action) {
           const { call } = sagaEffects;
           while (true) {
@@ -123,7 +137,6 @@ function createEffects(store, opts) {
   function put(action) {
     const { type } = action;
     assertAction(type, 'sagaEffects.put');
-    console.log({ ...action, type: prefixType(type, store) })
     return sagaEffects.put({ ...action, type: prefixType(type, store) });
   }
 
