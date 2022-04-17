@@ -1,15 +1,9 @@
 {
   "name": "saga-mobx",
-  "private": true,
   "version": "1.0.0",
   "description": "saga-mobx",
-  "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "clean": "lerna clean --yes",
-    "build": "father-build",
-    "test": "umi-test",
-    "test:coverage": "umi-test --coverage"
-  },
+  "main": "lib/index.js",
+  "module": "es/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xiaolonggb/saga-mobx.git"
@@ -20,14 +14,20 @@
     "url": "https://github.com/xiaolonggb/saga-mobx/issues"
   },
   "homepage": "https://github.com/xiaolonggb/saga-mobx#readme",
-  "devDependencies": {
-    "father-build": "^1.21.2",
-    "umi-test": "^1.9.6",
-    "lerna": "^3.22.1"
-  },
   "dependencies": {
+    "is-plain-object": "^5.0.0",
+    "mobx": "~6.5.0",
+    "mobx-react": "~7.3.0",
+    "redux-saga": "~1.1.3",
+    "warning": "^4.0.3"
   },
-  "workspaces": [
-    "packages/*"
+  "keywords": [
+    "mobx",
+    "saga-mobx",
+    "saga"
+  ],
+  "files": [
+    "lib",
+    "es"
   ]
 }

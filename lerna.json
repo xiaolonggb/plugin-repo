@@ -1,0 +1,16 @@
+{
+  "packages": ["packages/*"],
+  "command": {
+    "version": {
+      "exact": true
+    },
+    "publish": {
+      "allowBranch": ["master", "feature/*"],
+      "registry": "http://192.168.1.55:8081/repository/npm-in/"
+    }
+  },
+  "npmClient": "yarn",
+  "version": "independent",
+  "useWorkspaces": true,
+  "lerna": "2.11.0"
+}
