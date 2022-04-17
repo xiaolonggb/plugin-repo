@@ -143,42 +143,8 @@ app.registeredEffects(Store${lodash.upperFirst(lodash.camelCase(basename(path, e
         }) || dirname(require.resolve('saga-mobx/package.json')),
       );
       const sagaMobxVersion = require(join(sagaMobxLibPath, 'package.json')).version;
-      // const exportMethods = [];
 
       logger.debug(`saga-mobx version: ${sagaMobxVersion}`);
-      // logger.debug(`exported methods:`);
-      // logger.debug(exportMethods);
-
-      // api.writeTmpFile({
-      //   path: 'plugin-saga-mobx/exports.ts',
-      //   content: Mustache.render(exportsTpl, {
-      //     exportMethods: exportMethods.join(', '),
-      //   }),
-      // });
-
-      // typings
-
-      // const connectTpl = readFileSync(join(__dirname, 'connect.tpl'), 'utf-8');
-    //   api.writeTmpFile({
-    //     path: 'plugin-dva/connect.ts',
-    //     content: Mustache.render(connectTpl, {
-    //       dvaHeadExport: api.config.dva?.disableStoresReExport
-    //         ? ``
-    //         : Stores
-    //             .map((path) => {
-    //               // prettier-ignore
-    //               return `export * from '${winPath(dirname(path) + "/" + basename(path, extname(path)))}';`;
-    //             })
-    //             .join('\r\n'),
-    //       dvaLoadingStores: Stores
-    //         .map((path) => {
-    //           // prettier-ignore
-    //           return `    ${basename(path, extname(path))
-    //             } ?: boolean;`;
-    //         })
-    //         .join('\r\n'),
-    //     }),
-    //   });
     },
     // 要比 preset-built-in 靠前
     // 在内部文件生成之前执行，这样 hasStores 设的值对其他函数才有效
@@ -197,39 +163,23 @@ app.registeredEffects(Store${lodash.upperFirst(lodash.camelCase(basename(path, e
   api.addRuntimePlugin(() =>
     hasStores ? [join(api.paths.absTmpPath!, 'plugin-saga-mobx/runtime.tsx')] : [],
   );
-  // api.addRuntimePluginKey(() => (hasStores ? ['saga-mobx'] : []));
+  api.addRuntimePluginKey(() => (hasStores ? ['sagaMobx'] : []));
 
-  // 导出内容
-  // api.addUmiExports(() =>
-  //   hasStores
-  //     ? [
-  //         {
-  //           exportAll: true,
-  //           source: '../plugin-dva/exports',
-  //         },
-  //         {
-  //           exportAll: true,
-  //           source: '../plugin-dva/connect',
-  //         },
-  //       ]
-  //     : [],
-  // );
-
-  // api.registerCommand({
-  //   name: 'sagaMobx',
-  //   fn({ args }) {
-  //     if (args._[0] === 'list' && args._[1] === 'store') {
-  //       const Stores = getAllStores();
-  //       console.log();
-  //       console.log(utils.chalk.bold('  Stores in your project:'));
-  //       console.log();
-  //       Stores.forEach((store) => {
-  //         console.log(`    - ${relative(api.cwd, store)}`);
-  //       });
-  //       console.log();
-  //       console.log(`  Totally ${Stores.length}.`);
-  //       console.log();
-  //     }
-  //   },
-  // });
+  api.registerCommand({
+    name: 'saga-mobx',
+    fn({ args }) {
+      if (args._[0] === 'list' && args._[1] === 'store') {
+        const Stores = getAllStores();
+        console.log();
+        console.log(utils.chalk.bold('  Stores in your project:'));
+        console.log();
+        Stores.forEach((store) => {
+          console.log(`    - ${relative(api.cwd, store)}`);
+        });
+        console.log();
+        console.log(`  Totally ${Stores.length}.`);
+        console.log();
+      }
+    },
+  });
 };

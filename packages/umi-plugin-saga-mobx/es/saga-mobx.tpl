@@ -11,11 +11,19 @@ import { plugin, history } from '../core/umiExports';
 let app:any = null;
 
 export {{ #LazyLoad }}async {{ /LazyLoad }}function _onCreate(options = {}) {
+  const runtimeSagaMobx = plugin.applyPlugins({
+    key: 'dva',
+    type: ApplyPluginsType.modify,
+    initialValue: {},
+  });
   {{ #LazyLoad }}
   {{{ RegisterStoreImports }}}
   {{ /LazyLoad }}
   app = create();
   app.use(createLoading());
+  (runtimeSagaMobx.plugins || []).forEach((plugin:any) => {
+    app.use(plugin);
+  });
   {{{ RegisterStores }}}
   return app;
 }

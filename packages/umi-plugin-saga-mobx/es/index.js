@@ -17,7 +17,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 import { utils } from 'umi';
-import { basename, dirname, extname, join } from 'path';
+import { basename, dirname, extname, join, relative } from 'path';
 import { readFileSync } from 'fs';
 import { getStores } from './getStores/getStores';
 import { getUserLibDir } from './getUserLibDir';
@@ -133,39 +133,9 @@ export default (function (api) {
         cwd: api.cwd
       }) || dirname(require.resolve('saga-mobx/package.json')));
 
-      var sagaMobxVersion = require(join(sagaMobxLibPath, 'package.json')).version; // const exportMethods = [];
+      var sagaMobxVersion = require(join(sagaMobxLibPath, 'package.json')).version;
 
-
-      logger.debug("saga-mobx version: ".concat(sagaMobxVersion)); // logger.debug(`exported methods:`);
-      // logger.debug(exportMethods);
-      // api.writeTmpFile({
-      //   path: 'plugin-saga-mobx/exports.ts',
-      //   content: Mustache.render(exportsTpl, {
-      //     exportMethods: exportMethods.join(', '),
-      //   }),
-      // });
-      // typings
-      // const connectTpl = readFileSync(join(__dirname, 'connect.tpl'), 'utf-8');
-      //   api.writeTmpFile({
-      //     path: 'plugin-dva/connect.ts',
-      //     content: Mustache.render(connectTpl, {
-      //       dvaHeadExport: api.config.dva?.disableStoresReExport
-      //         ? ``
-      //         : Stores
-      //             .map((path) => {
-      //               // prettier-ignore
-      //               return `export * from '${winPath(dirname(path) + "/" + basename(path, extname(path)))}';`;
-      //             })
-      //             .join('\r\n'),
-      //       dvaLoadingStores: Stores
-      //         .map((path) => {
-      //           // prettier-ignore
-      //           return `    ${basename(path, extname(path))
-      //             } ?: boolean;`;
-      //         })
-      //         .join('\r\n'),
-      //     }),
-      //   });
+      logger.debug("saga-mobx version: ".concat(sagaMobxVersion));
     },
     // 要比 preset-built-in 靠前
     // 在内部文件生成之前执行，这样 hasStores 设的值对其他函数才有效
@@ -185,37 +155,27 @@ export default (function (api) {
 
   api.addRuntimePlugin(function () {
     return hasStores ? [join(api.paths.absTmpPath, 'plugin-saga-mobx/runtime.tsx')] : [];
-  }); // api.addRuntimePluginKey(() => (hasStores ? ['saga-mobx'] : []));
-  // 导出内容
-  // api.addUmiExports(() =>
-  //   hasStores
-  //     ? [
-  //         {
-  //           exportAll: true,
-  //           source: '../plugin-dva/exports',
-  //         },
-  //         {
-  //           exportAll: true,
-  //           source: '../plugin-dva/connect',
-  //         },
-  //       ]
-  //     : [],
-  // );
-  // api.registerCommand({
-  //   name: 'sagaMobx',
-  //   fn({ args }) {
-  //     if (args._[0] === 'list' && args._[1] === 'store') {
-  //       const Stores = getAllStores();
-  //       console.log();
-  //       console.log(utils.chalk.bold('  Stores in your project:'));
-  //       console.log();
-  //       Stores.forEach((store) => {
-  //         console.log(`    - ${relative(api.cwd, store)}`);
-  //       });
-  //       console.log();
-  //       console.log(`  Totally ${Stores.length}.`);
-  //       console.log();
-  //     }
-  //   },
-  // });
+  });
+  api.addRuntimePluginKey(function () {
+    return hasStores ? ['sagaMobx'] : [];
+  });
+  api.registerCommand({
+    name: 'saga-mobx',
+    fn: function fn(_ref) {
+      var args = _ref.args;
+
+      if (args._[0] === 'list' && args._[1] === 'store') {
+        var Stores = getAllStores();
+        console.log();
+        console.log(utils.chalk.bold('  Stores in your project:'));
+        console.log();
+        Stores.forEach(function (store) {
+          console.log("    - ".concat(relative(api.cwd, store)));
+        });
+        console.log();
+        console.log("  Totally ".concat(Stores.length, "."));
+        console.log();
+      }
+    }
+  });
 });

@@ -146,39 +146,9 @@ var _default = function _default(api) {
         cwd: api.cwd
       }) || (0, _path.dirname)(require.resolve('saga-mobx/package.json')));
 
-      var sagaMobxVersion = require((0, _path.join)(sagaMobxLibPath, 'package.json')).version; // const exportMethods = [];
+      var sagaMobxVersion = require((0, _path.join)(sagaMobxLibPath, 'package.json')).version;
 
-
-      logger.debug("saga-mobx version: ".concat(sagaMobxVersion)); // logger.debug(`exported methods:`);
-      // logger.debug(exportMethods);
-      // api.writeTmpFile({
-      //   path: 'plugin-saga-mobx/exports.ts',
-      //   content: Mustache.render(exportsTpl, {
-      //     exportMethods: exportMethods.join(', '),
-      //   }),
-      // });
-      // typings
-      // const connectTpl = readFileSync(join(__dirname, 'connect.tpl'), 'utf-8');
-      //   api.writeTmpFile({
-      //     path: 'plugin-dva/connect.ts',
-      //     content: Mustache.render(connectTpl, {
-      //       dvaHeadExport: api.config.dva?.disableStoresReExport
-      //         ? ``
-      //         : Stores
-      //             .map((path) => {
-      //               // prettier-ignore
-      //               return `export * from '${winPath(dirname(path) + "/" + basename(path, extname(path)))}';`;
-      //             })
-      //             .join('\r\n'),
-      //       dvaLoadingStores: Stores
-      //         .map((path) => {
-      //           // prettier-ignore
-      //           return `    ${basename(path, extname(path))
-      //             } ?: boolean;`;
-      //         })
-      //         .join('\r\n'),
-      //     }),
-      //   });
+      logger.debug("saga-mobx version: ".concat(sagaMobxVersion));
     },
     // 要比 preset-built-in 靠前
     // 在内部文件生成之前执行，这样 hasStores 设的值对其他函数才有效
@@ -198,39 +168,29 @@ var _default = function _default(api) {
 
   api.addRuntimePlugin(function () {
     return hasStores ? [(0, _path.join)(api.paths.absTmpPath, 'plugin-saga-mobx/runtime.tsx')] : [];
-  }); // api.addRuntimePluginKey(() => (hasStores ? ['saga-mobx'] : []));
-  // 导出内容
-  // api.addUmiExports(() =>
-  //   hasStores
-  //     ? [
-  //         {
-  //           exportAll: true,
-  //           source: '../plugin-dva/exports',
-  //         },
-  //         {
-  //           exportAll: true,
-  //           source: '../plugin-dva/connect',
-  //         },
-  //       ]
-  //     : [],
-  // );
-  // api.registerCommand({
-  //   name: 'sagaMobx',
-  //   fn({ args }) {
-  //     if (args._[0] === 'list' && args._[1] === 'store') {
-  //       const Stores = getAllStores();
-  //       console.log();
-  //       console.log(utils.chalk.bold('  Stores in your project:'));
-  //       console.log();
-  //       Stores.forEach((store) => {
-  //         console.log(`    - ${relative(api.cwd, store)}`);
-  //       });
-  //       console.log();
-  //       console.log(`  Totally ${Stores.length}.`);
-  //       console.log();
-  //     }
-  //   },
-  // });
+  });
+  api.addRuntimePluginKey(function () {
+    return hasStores ? ['sagaMobx'] : [];
+  });
+  api.registerCommand({
+    name: 'saga-mobx',
+    fn: function fn(_ref) {
+      var args = _ref.args;
+
+      if (args._[0] === 'list' && args._[1] === 'store') {
+        var Stores = getAllStores();
+        console.log();
+        console.log(_umi.utils.chalk.bold('  Stores in your project:'));
+        console.log();
+        Stores.forEach(function (store) {
+          console.log("    - ".concat((0, _path.relative)(api.cwd, store)));
+        });
+        console.log();
+        console.log("  Totally ".concat(Stores.length, "."));
+        console.log();
+      }
+    }
+  });
 };
 
 exports.default = _default;
