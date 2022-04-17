@@ -16,10 +16,8 @@
   "homepage": "https://github.com/xiaolonggb/saga-mobx#readme",
   "peerDependencies": {
     "react": "16.x",
-    "umi": "3.x",
-    "saga-mobx": "1.x"
-  },
-  "dependencies": {
+    "saga-mobx": "1.x",
+    "umi": "3.x"
   },
   "keywords": [
     "umi",
