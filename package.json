@@ -9,6 +9,7 @@
     "build": "father-build",
     "test": "umi-test",
     "test:coverage": "umi-test --coverage",
+    "build:publish": "yarn run build && yarn run publish",
     "publish": "lerna publish"
   },
   "repository": {

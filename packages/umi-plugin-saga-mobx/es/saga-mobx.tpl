@@ -12,7 +12,7 @@ let app:any = null;
 
 export {{ #LazyLoad }}async {{ /LazyLoad }}function _onCreate(options = {}) {
   const runtimeSagaMobx = plugin.applyPlugins({
-    key: 'dva',
+    key: 'sagaMobx',
     type: ApplyPluginsType.modify,
     initialValue: {},
   });
@@ -66,7 +66,6 @@ export class _sagaMobxContainer extends Component {
     // app._models = [];
     try {
       // 释放 app，for gc
-      // immer 场景 app 是 read-only 的，这里 try catch 一下
       app = null;
     } catch(e) {
       console.error(e);
