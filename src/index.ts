@@ -56,7 +56,7 @@ function effects(type: EffectType = 'takeEvery', options?: null | object) {
 
 const channel = stdChannel();
 
-const dispatch = (action) => {
+const dispatch = (action: AnyAction) => {
   return new Promise((resolve, reject) => {
     channel.put({
       __dva_resolve: resolve,
@@ -76,9 +76,17 @@ function create(hooksAndOpts = {}, createOpts = {}) {
     getState: () => stores
   }
 
-  function noop () {}
-  const onError = noop;
-  const onEffect = [];
+  const onError = (err, extension) => {
+    if (err) {
+      if (typeof err === 'string') err = new Error(err);
+      err.preventDefault = () => {
+        err._dontReject = true;
+      };
+      plugin.apply('onError', err => {
+        throw new Error(err.stack || err);
+      })(err, dispatch, extension);
+    }
+  };
 
   function _getStores() {
     return stores;
