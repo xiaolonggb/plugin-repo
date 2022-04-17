@@ -1,0 +1,36 @@
+{
+  "name": "umi-plugin-saga-mobx",
+  "version": "1.0.0",
+  "description": "umi plugin with saga-mobx",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaolonggb/saga-mobx.git"
+  },
+  "author": "xiaolong<123525906@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xiaolonggb/saga-mobx/issues"
+  },
+  "homepage": "https://github.com/xiaolonggb/saga-mobx#readme",
+  "peerDependencies": {
+    "umi": "3.x",
+    "react": "16.x"
+  },
+  "dependencies": {
+    "saga-mobx": "~1.0.0",
+    "warning": "^4.0.3"
+  },
+  "keywords": [
+    "umi",
+    "umi-plugin",
+    "mobx",
+    "saga-mobx",
+    "saga"
+  ],
+  "files": [
+    "lib",
+    "es"
+  ]
+}

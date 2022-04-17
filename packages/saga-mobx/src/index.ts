@@ -107,6 +107,7 @@ function create(hooksAndOpts = {}, createOpts = {}) {
   return app;
 }
 
-export { effects, namespace, dispatch, create };
+export { effects, namespace, dispatch };
+export default create;
 export * from 'mobx';
 export * from 'mobx-react';

@@ -6,7 +6,7 @@
     },
     "publish": {
       "allowBranch": ["master", "feature/*"],
-      "registry": "http://192.168.1.55:8081/repository/npm-in/"
+      "registry": "https://registry.npmjs.org/"
     }
   },
   "npmClient": "yarn",
