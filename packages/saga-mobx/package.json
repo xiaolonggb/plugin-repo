@@ -1,6 +1,6 @@
 {
   "name": "saga-mobx",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "saga-mobx",
   "main": "lib/index.js",
   "module": "es/index.js",
