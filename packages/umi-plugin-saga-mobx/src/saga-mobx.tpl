@@ -60,10 +60,10 @@ export class _sagaMobxContainer extends Component {
 
   componentWillUnmount() {
     let app = getApp();
-    // app._models.forEach((model:any) => {
-    //  app.unmodel(model.namespace);
-    // });
-    // app._models = [];
+    let stores = app.getStores();
+    Object.keys(stores).forEach((namespace: string) => {
+      app.unregisterEffects(stores[namespace]);
+    })
     try {
       // 释放 app，for gc
       app = null;

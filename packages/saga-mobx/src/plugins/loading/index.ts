@@ -4,7 +4,6 @@ import {
   observable,
   action,
   namespace as namespaceFn,
-  effects as effectsFn,
 } from "../../index";
 
 const NAMESPACE = "loading";

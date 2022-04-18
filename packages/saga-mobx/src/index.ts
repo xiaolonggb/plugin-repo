@@ -8,6 +8,7 @@ import {
 import getSaga from './getSaga';
 import Plugin from './Plugin';
 import invariant from 'invariant';
+import warning from 'warning';
 import { isPlainObject } from './utils';
 import { effectSymbol, namespaceSymbol } from './constants';
 
@@ -66,9 +67,9 @@ const dispatch = (action: AnyAction) => {
   });
 };
 
-function create(hooksAndOpts = {}, createOpts = {}) {
+function create() {
   const plugin = new Plugin();
-  const stores = {};
+  let stores = {};
 
   const io = {
     channel,
@@ -93,14 +94,36 @@ function create(hooksAndOpts = {}, createOpts = {}) {
   }
 
   function _registeredEffects (store: any) {
+    const namespace = store[namespaceSymbol];
+    if (!namespace) {
+      warning(namespace, 'saga-mobx: store must have a unique namespace to register');
+      return;
+    }
     invariant(!stores[store[namespaceSymbol]], `saga-mobx: store namespace ${store[namespaceSymbol]} is multiple`);
     stores[store[namespaceSymbol]]= store;
     runSaga(io, getSaga(store, onError, plugin.get('onEffect')))
   }
 
+  /*
+  *  取消注册
+  */
+  function _unregisterEffects (store) {
+    const storeNamespace = store[namespaceSymbol];
+    // 取消 effects
+    dispatch({ type: `${namespace}/@@CANCEL_EFFECTS` });
+
+    // 移除store
+    Object.keys(stores).forEach((namespace: string) => {
+      if (storeNamespace === namespace) {
+        delete stores[namespace];
+      }
+    });
+  }
+
   const app = {
     getStores: _getStores,
     registeredEffects: _registeredEffects,
+    unregisterEffects: _unregisterEffects,
     use: plugin.use.bind(plugin, stores),
   }
 

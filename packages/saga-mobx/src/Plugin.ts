@@ -33,6 +33,7 @@ export default class Plugin {
         invariant(hooks[key], `plugin.use: unknown plugin property: ${key}`);
         if (key === 'extraStore') {
           const extraStore = plugin[key];
+          invariant(!stores[extraStore[namespaceSymbol]], `saga-mobx: store namespace ${extraStore[namespaceSymbol]} is multiple`);
           stores[extraStore[namespaceSymbol]] = extraStore;
         }
         hooks[key].push(plugin[key]);
