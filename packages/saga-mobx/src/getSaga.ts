@@ -8,7 +8,7 @@ import { delay, isFunction } from './utils';
 export default function getSaga(store, onError, onEffect) {
   return function*() {
     for (const prop in store) {
-      if (Object.prototype.hasOwnProperty.call(store, prop) && isFunction(store[prop]) && store[prop][effectSymbol]) {
+      if (isFunction(store[prop]) && store[prop][effectSymbol]) {
         const namespace = store[namespaceSymbol];
         const key = namespace ? `${namespace}${NAMESPACE_SEP}${prop}` : prop;
         const watcher = getWatcher(key, store[prop], store, onError, onEffect);
