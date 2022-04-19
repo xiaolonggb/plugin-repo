@@ -2097,10 +2097,10 @@ safer-buffer@^2.1.0:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-saga-mobx@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/saga-mobx/-/saga-mobx-1.0.2.tgz#b8fa96744ded901176c4d44c4a492d88233a402a"
-  integrity sha512-MyMuHJTK7cpSxBAzSXSvQ/ok8+e3H3le50wgCE+qiGU6y18vizKjtw61yCZVUlCneTly11EfhSpbqnHqYi3dpA==
+saga-mobx@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/saga-mobx/-/saga-mobx-1.1.1.tgz#ca9af894d36893ab9fe129e0c04353025f378c39"
+  integrity sha512-L2nR3025V3sPGnGGg7oCNochcACjCKU7kg09N1UO5At92e4EH0fUAoAFsuCMJ14fBQ3L7iJsISyYGWggfNqGkg==
   dependencies:
     is-plain-object "^5.0.0"
     mobx "~6.5.0"

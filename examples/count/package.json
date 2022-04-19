@@ -8,7 +8,7 @@
   "dependencies": {
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "saga-mobx": "^1.1.0",
+    "saga-mobx": "^1.1.1",
     "umi": "^3.5.22"
   }
 }
