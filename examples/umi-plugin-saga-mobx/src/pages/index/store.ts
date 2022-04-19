@@ -15,7 +15,7 @@ class Store {
     this.value = value;
   }
   
-  @effect(('poll', {delay: 1000})
+  @effect('poll', {delay: 1000})
   *test(action: AnyAction) {
     console.log(action);
     yield new Promise<void>((resolve, reject) => {
