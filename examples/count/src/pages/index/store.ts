@@ -1,4 +1,4 @@
-import { effects, namespace, makeObservable, observable, action } from 'saga-mobx';
+import { effect, namespace, makeObservable, observable, action } from 'saga-mobx';
 import type { AnyAction, EffectsCommandMap } from 'saga-mobx';
 
 const delay = (ms: number) => new Promise((resolve, reject) => {
@@ -22,7 +22,7 @@ class Store {
     this.value = value;
   }
   
-  @effects('poll', {delay: 1000})
+  @effect(('poll', {delay: 1000})
   *test(action: AnyAction) {
     console.log(action);
     yield new Promise<void>((resolve, reject) => {
@@ -49,13 +49,13 @@ class Store1 {
   }
 
   // 注册一个effect
-  @effects()
+  @effect(()
   *test2({ payload }: AnyAction, { put, call }: EffectsCommandMap) {
     console.log('payload', payload)
     this.changeValue(this.value + 1);
   }
 
-  @effects()
+  @effect(()
   *test1({ payload }: AnyAction, { put, call, select }: EffectsCommandMap) {
     const count: number = yield call(delay, 2000);
     yield put({type: 'test2', payload: {commit: 1}});

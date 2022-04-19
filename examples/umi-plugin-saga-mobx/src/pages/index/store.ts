@@ -1,4 +1,4 @@
-import { effects, namespace, makeObservable, observable, action } from 'saga-mobx';
+import { effect, namespace, makeObservable, observable, action } from 'saga-mobx';
 import type { AnyAction, EffectsCommandMap } from 'saga-mobx';
 
 @namespace('storeOne')
@@ -15,7 +15,7 @@ class Store {
     this.value = value;
   }
   
-  @effects('poll', {delay: 1000})
+  @effect(('poll', {delay: 1000})
   *test(action: AnyAction) {
     console.log(action);
     yield new Promise<void>((resolve, reject) => {

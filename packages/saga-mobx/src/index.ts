@@ -41,7 +41,7 @@ function namespace(namespace) {
   }
 }
 
-function effects(type: EffectType = 'takeEvery', options?: null | object) {
+function effect(type: EffectType = 'takeEvery', options?: null | object) {
   const effectOpt: EffectOpt = { type };
   if (isPlainObject(options)) {
     effectOpt.options = options;
@@ -110,7 +110,7 @@ function create() {
   function _unregisterEffects (store) {
     const storeNamespace = store[namespaceSymbol];
     // 取消 effects
-    dispatch({ type: `${namespace}/@@CANCEL_EFFECTS` });
+    dispatch({ type: `${storeNamespace}/@@CANCEL_EFFECTS` });
 
     // 移除store
     Object.keys(stores).forEach((namespace: string) => {
@@ -130,7 +130,7 @@ function create() {
   return app;
 }
 
-export { effects, namespace, dispatch };
+export { effect, namespace, dispatch };
 export default create;
 export * from 'mobx';
 export * from 'mobx-react';
