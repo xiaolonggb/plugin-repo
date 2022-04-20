@@ -1,0 +1,36 @@
+{
+  "name": "saga-mobx",
+  "private": true,
+  "version": "1.0.0",
+  "description": "saga-mobx",
+  "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "clean": "lerna clean --yes",
+    "build": "father-build",
+    "test": "umi-test",
+    "test:coverage": "umi-test --coverage",
+    "build:publish": "yarn run build && yarn run publish",
+    "publish": "lerna publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiaolonggb/saga-mobx.git"
+  },
+  "author": "xiaolong<123525906@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xiaolonggb/saga-mobx/issues"
+  },
+  "homepage": "https://github.com/xiaolonggb/saga-mobx#readme",
+  "devDependencies": {
+    "father-build": "^1.21.2",
+    "umi-test": "^1.9.6",
+    "lerna": "^3.22.1",
+    "umi": "^3.4.24"
+  },
+  "dependencies": {
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
