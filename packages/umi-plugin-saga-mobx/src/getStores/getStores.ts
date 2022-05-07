@@ -23,20 +23,5 @@ export function getStores(opts: {
       if (/\.d.ts$/.test(f)) return false;
       if (/\.(test|e2e|spec).(j|t)sx?$/.test(f)) return false;
       return true;
-      // 允许通过配置下跳过 Model 校验
-      // if (opts.skipModelValidate) return true;
-
-      // TODO: fs cache for performance
-      // try {
-      //   return isValidStore({
-      //     content: readFileSync(f, 'utf-8'),
-      //   });
-      // } catch (error) {
-      //   throw new Error(
-      //     `saga-mobx store ${utils.winPath(
-      //       relative(opts.cwd, f),
-      //     )} parse failed, ${error}`,
-      //   );
-      // }
     });
 }

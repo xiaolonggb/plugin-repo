@@ -39,7 +39,6 @@ export default (api: IApi) => {
               'lazy load saga-mobx store avoiding the import modules from umi undefined',
             ),
           extraStores: joi.array().items(joi.string()),
-          skipStoreValidate: joi.boolean(),
           providerAllStore: joi.boolean()
         });
       },
@@ -49,7 +48,6 @@ export default (api: IApi) => {
   function getAllStores() {
     const srcStoresPath = getSrcStoresPath();
     const baseOpts = {
-      skipStoreValidate: api.config.sagaMobx?.skipStoreValidate,
       extraStores: api.config.sagaMobx?.extraStores,
     };
     return lodash.uniq([
