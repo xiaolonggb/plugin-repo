@@ -1,10 +1,6 @@
+import {makeObservable, observable, action,} from 'mobx';
 import { namespaceSymbol } from "../../constants";
-import {
-  makeObservable,
-  observable,
-  action,
-  namespace as namespaceFn,
-} from "../../index";
+import { namespace as namespaceFn } from "../../index";
 
 const NAMESPACE = "loading";
 @namespaceFn(NAMESPACE)

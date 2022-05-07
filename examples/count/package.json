@@ -6,9 +6,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "mobx": "^6.5.0",
+    "mobx-react": "^7.3.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "saga-mobx": "^1.1.1",
     "umi": "^3.5.22"
   }
 }

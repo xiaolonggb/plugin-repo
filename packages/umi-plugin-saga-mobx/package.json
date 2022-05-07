@@ -17,6 +17,7 @@
   "peerDependencies": {
     "react": "16.x",
     "saga-mobx": "1.x",
+    "mobx-react": "7.x",
     "umi": "3.x"
   },
   "keywords": [

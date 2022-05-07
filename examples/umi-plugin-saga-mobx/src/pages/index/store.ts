@@ -1,4 +1,5 @@
-import { effect, namespace, makeObservable, observable, action } from 'saga-mobx';
+import { makeObservable, observable, action } from 'mobx';
+import { effect, namespace } from 'saga-mobx';
 import type { AnyAction, EffectsCommandMap } from 'saga-mobx';
 
 @namespace('storeOne')

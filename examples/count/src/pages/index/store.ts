@@ -1,4 +1,5 @@
-import { effect, namespace, makeObservable, observable, action } from 'saga-mobx';
+import { makeObservable, observable, action } from 'mobx';
+import { effect, namespace } from 'saga-mobx';
 import type { AnyAction, EffectsCommandMap } from 'saga-mobx';
 
 const delay = (ms: number) => new Promise((resolve, reject) => {
@@ -50,19 +51,21 @@ class Store1 {
 
   // 注册一个effect
   @effect()
-  *test2({ payload }: AnyAction, { put, call }: EffectsCommandMap) {
+  *test2(payload: any, sagaEffects?: EffectsCommandMap) {
     console.log('payload', payload)
     this.changeValue(this.value + 1);
   }
 
   @effect()
-  *test1({ payload }: AnyAction, { put, call, select }: EffectsCommandMap) {
-    const count: number = yield call(delay, 2000);
-    yield put({type: 'test2', payload: {commit: 1}});
+  *test1(payload: any, sagaEffects?: EffectsCommandMap) {
+    console.log('payload---', payload)
+    const count: number = yield sagaEffects?.call(delay, 2000);
+    yield this.test2({commit: 1});
     return count;
   }
 }
 // 风霜寂寞，掉落在你的怀中
 const store = new Store();
 const store1 = new Store1();
+console.log('store---', store1)
 export { store, store1 };

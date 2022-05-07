@@ -9,10 +9,11 @@ export default defineConfig({
   nodeModulesTransform: {
     type: 'none',
   },
+  plugins: ['./umi-plugin-saga-mobx.ts'],
   inlineLimit: 5000, // 设置低于5kb图片转base64
   hash: true,
   ignoreMomentLocale: true,
   webpack5: {},
-  sagaMobx: {},
+  sagaMobx: { providerAllStore: false },
   fastRefresh: {}
 })

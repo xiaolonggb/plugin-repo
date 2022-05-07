@@ -11,7 +11,7 @@ export default function getSaga(store, onError, onEffect) {
       if (isFunction(store[prop]) && store[prop][effectSymbol]) {
         const namespace = store[namespaceSymbol];
         const key = namespace ? `${namespace}${NAMESPACE_SEP}${prop}` : prop;
-        const watcher = getWatcher(key, store[prop], store, onError, onEffect);
+        const watcher = getWatcher(key, store[prop][effectSymbol], store, onError, onEffect);
         const task = yield sagaEffects.fork(watcher);
         yield sagaEffects.fork(function*() {
           yield sagaEffects.take(`${store[namespaceSymbol]}/@@CANCEL_EFFECTS`);
@@ -22,9 +22,9 @@ export default function getSaga(store, onError, onEffect) {
   };
 }
 
-function getWatcher(key, _effect, store, onError, onEffect) {
-  let effectOpts = _effect[effectSymbol];
-  let effect = _effect.bind(store);
+function getWatcher(key, effectOpts, store, onError, onEffect) {
+  const { effectFn } = effectOpts;
+  let effect = effectFn.bind(store);
   let type = effectOpts.type;
   let ms;
   let delayMs;
@@ -48,11 +48,11 @@ function getWatcher(key, _effect, store, onError, onEffect) {
   function noop() {}
 
   function* sagaWithCatch(...args) {
-    const { __dva_resolve: resolve = noop, __dva_reject: reject = noop } =
+    const { __dva_resolve: resolve = noop, __dva_reject: reject = noop, payload = {} } =
       args.length > 0 ? args[0] : {};
     try {
       yield sagaEffects.put({ type: `${key}${NAMESPACE_SEP}@@start` });
-      const ret = yield effect(...args.concat(createEffects(store, effectOpts)));
+      const ret = yield effect(payload, createEffects(store, effectOpts), ...args);
       yield sagaEffects.put({ type: `${key}${NAMESPACE_SEP}@@end` });
       resolve(ret);
     } catch (e) {

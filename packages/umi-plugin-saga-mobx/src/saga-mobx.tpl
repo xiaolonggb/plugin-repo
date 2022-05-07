@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ApplyPluginsType } from 'umi';
-import create, { Provider } from 'saga-mobx';
+import { Provider } from 'mobx-react';
+import create from 'saga-mobx';
 // @ts-ignore
 import createLoading from 'saga-mobx/es/plugins/loading';
 import { plugin, history } from '../core/umiExports';
@@ -79,6 +80,14 @@ export class _sagaMobxContainer extends Component {
       return null;
     }
     {{ /LazyLoad }}
-    return <Provider {...app.getStores()}>{this.props.children}</Provider>;
+    
+    return <Provider
+      {{ #ProviderAllStore }}
+      {...app.getStores()}
+      {{ /ProviderAllStore }}
+      {{ ^ProviderAllStore }}
+      loading={app.getStores()['loading']}
+      {{ /ProviderAllStore }}
+    >{this.props.children}</Provider>;
   }
 }

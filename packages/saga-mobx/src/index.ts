@@ -10,7 +10,7 @@ import Plugin from './Plugin';
 import invariant from 'invariant';
 import warning from 'warning';
 import { isPlainObject } from './utils';
-import { effectSymbol, namespaceSymbol } from './constants';
+import { effectSymbol, namespaceSymbol, NAMESPACE_SEP } from './constants';
 
 type EffectOpt = {
   type: string;
@@ -35,6 +35,18 @@ export interface EffectsCommandMap {
   [key: string]: any,
 }
 
+const channel = stdChannel();
+
+const dispatch = (action: AnyAction) => {
+  return new Promise((resolve, reject) => {
+    channel.put({
+      __dva_resolve: resolve,
+      __dva_reject: reject,
+      ...action,
+    });
+  });
+};
+
 function namespace(namespace) {
   return function(target) {
     target.prototype[namespaceSymbol] = namespace;
@@ -47,25 +59,21 @@ function effect(type: EffectType = 'takeEvery', options?: null | object) {
     effectOpt.options = options;
   }
   return function(target, key, des) {
-    des.value[effectSymbol]= {type, options};
+    const value = function(payload){
+      const namespace = this[namespaceSymbol];
+      if (!namespace) {
+        invariant(namespace, `saga-mobx: store must have a unique namespace to call effect(${key})`);
+      }
+      return dispatch({type: `${namespace}${NAMESPACE_SEP}${key}`, payload});
+    }
+    value[effectSymbol]= {type, options, effectFn: des.value};
     return {
       ...des,
+      value,
       enumerable: true
     };
   }
 }
-
-const channel = stdChannel();
-
-const dispatch = (action: AnyAction) => {
-  return new Promise((resolve, reject) => {
-    channel.put({
-      __dva_resolve: resolve,
-      __dva_reject: reject,
-      ...action,
-    });
-  });
-};
 
 function create() {
   const plugin = new Plugin();
@@ -94,9 +102,11 @@ function create() {
   }
 
   function _registeredEffects (store: any) {
+    if (!store) {
+      return;
+    }
     const namespace = store[namespaceSymbol];
     if (!namespace) {
-      warning(namespace, 'saga-mobx: store must have a unique namespace to register');
       return;
     }
     invariant(!stores[store[namespaceSymbol]], `saga-mobx: store namespace ${store[namespaceSymbol]} is multiple`);
@@ -132,5 +142,3 @@ function create() {
 
 export { effect, namespace, dispatch };
 export default create;
-export * from 'mobx';
-export * from 'mobx-react';

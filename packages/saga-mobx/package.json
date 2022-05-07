@@ -16,10 +16,12 @@
   "homepage": "https://github.com/xiaolonggb/saga-mobx#readme",
   "dependencies": {
     "is-plain-object": "^5.0.0",
-    "mobx": "~6.5.0",
-    "mobx-react": "~7.3.0",
     "redux-saga": "~1.1.3",
     "warning": "^4.0.3"
+  },
+  "peerDependencies": {
+    "mobx": "6.x",
+    "mobx-react": "7.x"
   },
   "keywords": [
     "mobx",

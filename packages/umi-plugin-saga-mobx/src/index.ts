@@ -40,6 +40,7 @@ export default (api: IApi) => {
             ),
           extraStores: joi.array().items(joi.string()),
           skipStoreValidate: joi.boolean(),
+          providerAllStore: joi.boolean()
         });
       },
     },
@@ -104,6 +105,7 @@ export default (api: IApi) => {
         path: 'plugin-saga-mobx/saga-mobx.tsx',
         content: Mustache.render(sagaMobxTpl, {
           LazyLoad: api.config.sagaMobx?.lazyLoad,
+          ProviderAllStore: api.config.sagaMobx?.providerAllStore ? true : false,
           RegisterStoreImports: Stores
             .map((path, index) => {
               const storeName = `Store${lodash.upperFirst(
