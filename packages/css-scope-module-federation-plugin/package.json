@@ -1,6 +1,6 @@
 {
   "name": "css-scope-module-federation-plugin",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "css scope for ModuleFederationPlugin",
   "repository": {
     "type": "git",
