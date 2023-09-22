@@ -1,0 +1,36 @@
+{
+  "name": "css-scope-module-federation-plugin",
+  "version": "0.0.5",
+  "description": "css scope for ModuleFederationPlugin",
+  "repository": {
+    "type": "git",
+    "url": "git@git.meetsocial.cn:creativebooster/frontend/cb-npm.git"
+  },
+  "homepage": "https://github.com/dvajs/dva",
+  "keywords": [
+    "css",
+    "scope",
+    "ModuleFederationPlugin"
+  ],
+  "authors": [
+    "xiaolong <123525906@qq.com>"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://git.meetsocial.cn/creativebooster/frontend/cb-npm/-/issues"
+  },
+  "dependencies": {
+    "mustache": "^4.2.0",
+    "postcss-loader": "^7.1.0",
+    "postcss-prefix-selector": "^1.16.0"
+  },
+  "peerDependencies": {
+    "webpack": "5.x"
+  },
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "es",
+    ".wrapper"
+  ]
+}
