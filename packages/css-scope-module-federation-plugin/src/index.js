@@ -2,7 +2,7 @@
  * @Author: xiaolong.xu
  * @Date: 2023-03-23 10:58:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-09-24 09:59:17
+ * @LastEditTime: 2023-09-24 19:45:06
  * @Description: file content
  */
 const { ModuleFederationPlugin } = require("webpack").container;
@@ -23,16 +23,17 @@ function isObject(obj) {
 class CssScopeModuleFederationPlugin {
   constructor({
     prefix,
-    AutoCssScopePrefix = false,
+    autoCssScopePrefix = false,
     excludesSelector = [],
     excludesFilePath = [],
     ...moduleFederationPluginOptions
   }) {
     this.prefix = prefix;
     this.excludesSelector = excludesSelector;
+    this.excludesFilePath = excludesFilePath;
     this.cwd = process.cwd();
     this.moduleFederationPluginOptions = moduleFederationPluginOptions || {};
-    if (AutoCssScopePrefix) {
+    if (autoCssScopePrefix) {
       const { exposes } = this.moduleFederationPluginOptions;
       let newExposes = {};
       Object.keys(exposes).forEach((name) => {
@@ -89,6 +90,7 @@ class CssScopeModuleFederationPlugin {
 
   addPostcssLoader(rules) {
     const excludesSelector = this.excludesSelector;
+    const excludesFilePath = this.excludesFilePath;
     const postcssLoader = {
       loader: require.resolve("postcss-loader"),
       options: {
