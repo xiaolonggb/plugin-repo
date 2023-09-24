@@ -2,7 +2,7 @@
  * @Author: xiaolong.xu
  * @Date: 2023-03-23 10:58:10
  * @LastEditors: 最后编辑
- * @LastEditTime: 2023-09-22 18:07:26
+ * @LastEditTime: 2023-09-24 09:59:17
  * @Description: file content
  */
 const { ModuleFederationPlugin } = require("webpack").container;
@@ -23,6 +23,7 @@ function isObject(obj) {
 class CssScopeModuleFederationPlugin {
   constructor({
     prefix,
+    AutoCssScopePrefix = false,
     excludesSelector = [],
     excludesFilePath = [],
     ...moduleFederationPluginOptions
@@ -31,37 +32,39 @@ class CssScopeModuleFederationPlugin {
     this.excludesSelector = excludesSelector;
     this.cwd = process.cwd();
     this.moduleFederationPluginOptions = moduleFederationPluginOptions || {};
+    if (AutoCssScopePrefix) {
+      const { exposes } = this.moduleFederationPluginOptions;
+      let newExposes = {};
+      Object.keys(exposes).forEach((name) => {
+        const originPath = exposes[name];
+        const concent = Mustache.render(
+          fs.readFileSync(
+            path.join(__dirname, "./tpl/cssScopeWrapper.tpl"),
+            "utf-8"
+          ),
+          {
+            exposesEntryOriginPath: originPath,
+            prefix,
+          }
+        );
 
-    const { exposes } = this.moduleFederationPluginOptions;
-    let newExposes = {};
-    Object.keys(exposes).forEach((name) => {
-      const originPath = exposes[name];
-      const concent = Mustache.render(
-        fs.readFileSync(
-          path.join(__dirname, "./tpl/cssScopeWrapper.tpl"),
-          "utf-8"
-        ),
-        {
-          exposesEntryOriginPath: originPath,
-          prefix,
+        if (!fs.existsSync(path.join(this.cwd, ".wrapper"))) {
+          fs.mkdirSync(path.join(this.cwd, ".wrapper"));
         }
-      );
 
-      if (!fs.existsSync(path.join(this.cwd, ".wrapper"))) {
-        fs.mkdirSync(path.join(this.cwd, ".wrapper"));
-      }
+        const cssScopeWrapperPath = path.join(
+          this.cwd,
+          `.wrapper/${name}CssScopeWrapper.tsx`
+        );
 
-      const cssScopeWrapperPath = path.join(
-        this.cwd,
-        `.wrapper/${name}CssScopeWrapper.tsx`
-      );
+        fs.writeFileSync(cssScopeWrapperPath, concent, "utf-8");
 
-      fs.writeFileSync(cssScopeWrapperPath, concent, "utf-8");
+        newExposes[name] = cssScopeWrapperPath;
+      });
 
-      newExposes[name] = cssScopeWrapperPath;
-    });
+      this.moduleFederationPluginOptions.exposes = newExposes;
+    }
 
-    this.moduleFederationPluginOptions.exposes = newExposes;
     this.moduleFederationPlugin = new ModuleFederationPlugin(
       this.moduleFederationPluginOptions
     );
