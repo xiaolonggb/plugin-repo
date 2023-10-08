@@ -7,11 +7,18 @@ import { delay, isFunction } from './utils';
 
 export default function getSaga(store, onError, onEffect) {
   return function*() {
+    // eslint-disable-next-line no-restricted-syntax
     for (const prop in store) {
       if (isFunction(store[prop]) && store[prop][effectSymbol]) {
         const namespace = store[namespaceSymbol];
         const key = namespace ? `${namespace}${NAMESPACE_SEP}${prop}` : prop;
-        const watcher = getWatcher(key, store[prop], store, onError, onEffect);
+        const watcher = getWatcher(
+          key,
+          store[prop][effectSymbol],
+          store,
+          onError,
+          onEffect,
+        );
         const task = yield sagaEffects.fork(watcher);
         yield sagaEffects.fork(function*() {
           yield sagaEffects.take(`${store[namespaceSymbol]}/@@CANCEL_EFFECTS`);
@@ -22,15 +29,15 @@ export default function getSaga(store, onError, onEffect) {
   };
 }
 
-function getWatcher(key, _effect, store, onError, onEffect) {
-  let effectOpts = _effect[effectSymbol];
-  let effect = _effect.bind(store);
-  let type = effectOpts.type;
+function getWatcher(key, effectOpts, store, onError, onEffect) {
+  const { effectFn } = effectOpts;
+  const effect = effectFn.bind(store);
+  const { type } = effectOpts;
   let ms;
   let delayMs;
 
   if (effectOpts.options) {
-    const options = effectOpts.options;
+    const { options } = effectOpts;
     if (type === 'debounce' || type === 'throttle') {
       invariant(options.ms, `${type}: options.ms should be defined`);
       ({ ms } = options);
@@ -40,7 +47,15 @@ function getWatcher(key, _effect, store, onError, onEffect) {
       ({ delay: delayMs } = options);
     }
     invariant(
-      ['watcher', 'takeLeading', 'takeEvery', 'takeLatest', 'debounce', 'throttle', 'poll'].indexOf(type) > -1,
+      [
+        'watcher',
+        'takeLeading',
+        'takeEvery',
+        'takeLatest',
+        'debounce',
+        'throttle',
+        'poll',
+      ].indexOf(type) > -1,
       'effectOpts: effect type should be takeEvery, takeLatest, throttle, poll, watcher, takeLeading or debounce',
     );
   }
@@ -48,11 +63,18 @@ function getWatcher(key, _effect, store, onError, onEffect) {
   function noop() {}
 
   function* sagaWithCatch(...args) {
-    const { __dva_resolve: resolve = noop, __dva_reject: reject = noop } =
-      args.length > 0 ? args[0] : {};
+    const {
+      __dva_resolve: resolve = noop,
+      __dva_reject: reject = noop,
+      payload = {},
+    } = args.length > 0 ? args[0] : {};
     try {
       yield sagaEffects.put({ type: `${key}${NAMESPACE_SEP}@@start` });
-      const ret = yield effect(...args.concat(createEffects(store, effectOpts)));
+      const ret = yield effect(
+        payload,
+        createEffects(store, effectOpts),
+        ...args,
+      );
       yield sagaEffects.put({ type: `${key}${NAMESPACE_SEP}@@end` });
       resolve(ret);
     } catch (e) {
@@ -60,6 +82,7 @@ function getWatcher(key, _effect, store, onError, onEffect) {
         key,
         effectArgs: args,
       });
+      // eslint-disable-next-line no-underscore-dangle
       if (!e._dontReject) {
         reject(e);
       }
@@ -74,34 +97,36 @@ function getWatcher(key, _effect, store, onError, onEffect) {
     case 'takeLeading':
       return function*() {
         yield sagaEffects.takeLeading(key, sagaWithOnEffect);
-      }
+      };
     case 'takeLatest':
       return function*() {
         yield sagaEffects.takeLatest(key, sagaWithOnEffect);
       };
     case 'debounce':
+      // eslint-disable-next-line no-case-declarations
       const { leading = true } = effectOpts.options;
       if (leading) {
         return function*() {
-          while(true){
+          while (true) {
             const action = yield sagaEffects.take(key);
-            yield sagaEffects.fork(function* (){
+            yield sagaEffects.fork(function*() {
               yield sagaEffects.call(sagaWithOnEffect, action);
-            })
+            });
             yield delay(ms);
           }
         };
       }
-      return function* () {
+      return function*() {
         yield sagaEffects.debounce(ms, key, sagaWithOnEffect);
-      }
+      };
     case 'throttle':
       return function*() {
         yield sagaEffects.throttle(ms, key, sagaWithOnEffect);
       };
     case 'poll':
       return function*() {
-        function* pollSagaWorker(sagaEffects, action) {
+        // eslint-disable-next-line @typescript-eslint/no-shadow
+        function* pollSagaWorker(sagaEffects: { call: any }, action: any) {
           const { call } = sagaEffects;
           while (true) {
             yield call(sagaWithOnEffect, action);
@@ -111,7 +136,10 @@ function getWatcher(key, _effect, store, onError, onEffect) {
         const { call, take, race } = sagaEffects;
         while (true) {
           const action = yield take(`${key}-start`);
-          yield race([call(pollSagaWorker, sagaEffects, action), take(`${key}-stop`)]);
+          yield race([
+            call(pollSagaWorker, sagaEffects, action),
+            take(`${key}-stop`),
+          ]);
         }
       };
     default:
@@ -160,7 +188,8 @@ function createEffects(store, opts) {
     if (typeof type === 'string') {
       assertAction(type, 'sagaEffects.take');
       return sagaEffects.take(prefixType(type, store));
-    } else if (Array.isArray(type)) {
+    }
+    if (Array.isArray(type)) {
       return sagaEffects.take(
         type.map(t => {
           if (typeof t === 'string') {
@@ -170,15 +199,16 @@ function createEffects(store, opts) {
           return t;
         }),
       );
-    } else {
-      return sagaEffects.take(type);
     }
+    return sagaEffects.take(type);
   }
   return { ...sagaEffects, put, take };
 }
 
 function applyOnEffect(fns, effect, store, key) {
+  // eslint-disable-next-line no-restricted-syntax
   for (const fn of fns) {
+    // eslint-disable-next-line no-param-reassign
     effect = fn(effect, sagaEffects, store, key);
   }
   return effect;

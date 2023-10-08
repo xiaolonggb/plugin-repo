@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { ApplyPluginsType } from 'umi';
-import create, { Provider } from 'saga-mobx';
+import { Provider } from 'mobx-react';
+import create from 'mobx-saga';
 // @ts-ignore
-import createLoading from 'saga-mobx/es/plugins/loading';
+import createLoading from 'mobx-saga/es/plugins/loading';
 import { plugin, history } from '../core/umiExports';
 {{ ^LazyLoad }}
 {{{ RegisterStoreImports }}}
@@ -12,7 +13,7 @@ let app:any = null;
 
 export {{ #LazyLoad }}async {{ /LazyLoad }}function _onCreate(options = {}) {
   const runtimeSagaMobx = plugin.applyPlugins({
-    key: 'sagaMobx',
+    key: 'mobxSaga',
     type: ApplyPluginsType.modify,
     initialValue: {},
   });
@@ -43,7 +44,7 @@ function isBrowser(): boolean {
   typeof window.document.createElement !== 'undefined'
 }
 
-export class _sagaMobxContainer extends Component {
+export class _mobxSagaContainer extends Component {
   constructor(props: any) {
     super(props);
     // run only in client, avoid override server _onCreate()
@@ -79,6 +80,14 @@ export class _sagaMobxContainer extends Component {
       return null;
     }
     {{ /LazyLoad }}
-    return <Provider {...app.getStores()}>{this.props.children}</Provider>;
+    
+    return <Provider
+      {{ #ProviderAllStore }}
+      {...app.getStores()}
+      {{ /ProviderAllStore }}
+      {{ ^ProviderAllStore }}
+      loading={app.getStores()['loading']}
+      {{ /ProviderAllStore }}
+    >{this.props.children}</Provider>;
   }
 }
