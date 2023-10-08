@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 import { IApi, utils } from 'umi';
 import { basename, dirname, extname, join, relative } from 'path';
 import { readFileSync } from 'fs';
@@ -5,6 +7,8 @@ import { getStores } from './getStores/getStores';
 import { getUserLibDir } from './getUserLibDir';
 
 const { Mustache, lodash, winPath } = utils;
+
+const PACKAGE_NAME = 'mobx-saga';
 
 export default (api: IApi) => {
   const { logger } = api;
@@ -17,29 +21,28 @@ export default (api: IApi) => {
     return join(api.paths.absSrcPath!, getStoreDir());
   }
 
-  function getSagaMobxDependency() {
+  function getPackageDependency() {
     const { dependencies, devDependencies } = api.pkg;
     return (
-      (dependencies && dependencies['saga-mobx']) ||
-      (devDependencies && devDependencies['saga-mobx']) ||
-      require('../package').dependencies['saga-mobx']
+      (dependencies && dependencies[PACKAGE_NAME]) ||
+      (devDependencies && devDependencies[PACKAGE_NAME]) ||
+      require('../package').dependencies[PACKAGE_NAME]
     );
   }
 
   // 配置
   api.describe({
-    key: 'sagaMobx',
+    key: 'mobxSaga',
     config: {
       schema(joi) {
         return joi.object({
-          disableStoresReExport: joi.boolean(),
           lazyLoad: joi
             .boolean()
             .description(
-              'lazy load saga-mobx store avoiding the import modules from umi undefined',
+              `lazy load ${PACKAGE_NAME} store avoiding the import modules from umi undefined`,
             ),
           extraStores: joi.array().items(joi.string()),
-          skipStoreValidate: joi.boolean(),
+          providerAllStore: joi.boolean(),
         });
       },
     },
@@ -48,8 +51,7 @@ export default (api: IApi) => {
   function getAllStores() {
     const srcStoresPath = getSrcStoresPath();
     const baseOpts = {
-      skipStoreValidate: api.config.sagaMobx?.skipStoreValidate,
-      extraStores: api.config.sagaMobx?.extraStores,
+      extraStores: api.config.mobxSaga?.extraStores,
     };
     return lodash.uniq([
       ...getStores({
@@ -81,8 +83,8 @@ export default (api: IApi) => {
 
   api.addDepInfo(() => {
     return {
-      name: 'saga-mobx',
-      range: getSagaMobxDependency(),
+      name: PACKAGE_NAME,
+      range: getPackageDependency(),
     };
   });
 
@@ -92,59 +94,60 @@ export default (api: IApi) => {
       const Stores = getAllStores();
 
       hasStores = Stores.length > 0;
-      logger.debug('saga-mobx Stores:');
+      logger.debug(`${PACKAGE_NAME} Stores:`);
       logger.debug(Stores);
 
       // 没有 Stores 不生成文件
       if (!hasStores) return;
 
-      // saga-mobx.ts
-      const sagaMobxTpl = readFileSync(join(__dirname, 'saga-mobx.tpl'), 'utf-8');
+      // mobx-saga.ts
+      const mobxSagaTpl = readFileSync(
+        join(__dirname, 'mobx-saga.tpl'),
+        'utf-8',
+      );
       api.writeTmpFile({
-        path: 'plugin-saga-mobx/saga-mobx.tsx',
-        content: Mustache.render(sagaMobxTpl, {
-          LazyLoad: api.config.sagaMobx?.lazyLoad,
-          RegisterStoreImports: Stores
-            .map((path, index) => {
-              const storeName = `Store${lodash.upperFirst(
-                lodash.camelCase(basename(path, extname(path))),
-              )}${index}`;
-              return api.config.sagaMobx?.lazyLoad
-                ? `const ${storeName} = (await import('${path}')).default;`
-                : `import ${storeName} from '${path}';`;
-            })
-            .join('\r\n'),
-          RegisterStores: Stores
-            .map((path, index) => {
-              // prettier-ignore
-              return `
+        path: 'plugin-mobx-saga/mobx-saga.tsx',
+        content: Mustache.render(mobxSagaTpl, {
+          LazyLoad: api.config.mobxSaga?.lazyLoad,
+          ProviderAllStore: !!api.config.mobxSaga?.providerAllStore,
+          RegisterStoreImports: Stores.map((path, index) => {
+            const storeName = `Store${lodash.upperFirst(
+              lodash.camelCase(basename(path, extname(path))),
+            )}${index}`;
+            return api.config.mobxSaga?.lazyLoad
+              ? `const ${storeName} = (await import('${path}')).default;`
+              : `import ${storeName} from '${path}';`;
+          }).join('\r\n'),
+          RegisterStores: Stores.map((path, index) => {
+            // prettier-ignore
+            return `
 app.registeredEffects(Store${lodash.upperFirst(lodash.camelCase(basename(path, extname(path))))}${index});
           `.trim();
-            })
-            .join('\r\n')
+          }).join('\r\n'),
         }),
       });
 
       // runtime.tsx
       const runtimeTpl = readFileSync(join(__dirname, 'runtime.tpl'), 'utf-8');
       api.writeTmpFile({
-        path: 'plugin-saga-mobx/runtime.tsx',
-        content: Mustache.render(runtimeTpl, {
-        }),
+        path: 'plugin-mobx-saga/runtime.tsx',
+        content: Mustache.render(runtimeTpl, {}),
       });
 
       // exports.ts
       // const exportsTpl = readFileSync(join(__dirname, 'exports.tpl'), 'utf-8');
-      const sagaMobxLibPath = winPath(
+      const mobxSagaLibPath = winPath(
         getUserLibDir({
-          library: 'saga-mobx',
+          library: PACKAGE_NAME,
           pkg: api.pkg,
           cwd: api.cwd,
-        }) || dirname(require.resolve('saga-mobx/package.json')),
+        }) || dirname(require.resolve(`${PACKAGE_NAME}/package.json`)),
       );
-      const sagaMobxVersion = require(join(sagaMobxLibPath, 'package.json')).version;
 
-      logger.debug(`saga-mobx version: ${sagaMobxVersion}`);
+      const mobxSagaVersion = require(join(mobxSagaLibPath, 'package.json'))
+        .version;
+
+      logger.debug(`${PACKAGE_NAME} version: ${mobxSagaVersion}`);
     },
     // 要比 preset-built-in 靠前
     // 在内部文件生成之前执行，这样 hasStores 设的值对其他函数才有效
@@ -154,26 +157,31 @@ app.registeredEffects(Store${lodash.upperFirst(lodash.camelCase(basename(path, e
   // src/Stores 下的文件变化会触发临时文件生成
   api.addTmpGenerateWatcherPaths(() => [getSrcStoresPath()]);
 
-  // saga-mobx 优先读用户项目的依赖
+  // mobx-saga 优先读用户项目的依赖
   api.addProjectFirstLibraries(() => [
-    { name: 'saga-mobx', path: dirname(require.resolve('saga-mobx/package.json')) },
+    {
+      name: PACKAGE_NAME,
+      path: dirname(require.resolve(`${PACKAGE_NAME}/package.json`)),
+    },
   ]);
 
   // Runtime Plugin
   api.addRuntimePlugin(() =>
-    hasStores ? [join(api.paths.absTmpPath!, 'plugin-saga-mobx/runtime.tsx')] : [],
+    hasStores
+      ? [join(api.paths.absTmpPath!, 'plugin-mobx-saga/runtime.tsx')]
+      : [],
   );
-  api.addRuntimePluginKey(() => (hasStores ? ['sagaMobx'] : []));
+  api.addRuntimePluginKey(() => (hasStores ? ['mobxSaga'] : []));
 
   api.registerCommand({
-    name: 'saga-mobx',
+    name: 'mobx-saga',
     fn({ args }) {
       if (args._[0] === 'list' && args._[1] === 'store') {
         const Stores = getAllStores();
         console.log();
         console.log(utils.chalk.bold('  Stores in your project:'));
         console.log();
-        Stores.forEach((store) => {
+        Stores.forEach(store => {
           console.log(`    - ${relative(api.cwd, store)}`);
         });
         console.log();

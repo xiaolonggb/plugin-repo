@@ -1,26 +1,22 @@
-import { namespaceSymbol } from "../../constants";
-import {
-  makeObservable,
-  observable,
-  action,
-  namespace as namespaceFn,
-} from "../../index";
+import { makeObservable, observable, action } from 'mobx';
+import { namespaceSymbol } from '../../constants';
+import { namespace as namespaceFn } from '../../index';
 
-const NAMESPACE = "loading";
+const NAMESPACE = 'loading';
 @namespaceFn(NAMESPACE)
 class Store {
   constructor() {
     makeObservable(this);
   }
   @observable global: boolean = false;
-  @observable models: any = {};
+  @observable stores: any = {};
   @observable effects: any = {};
 
   @action
   show({ payload }) {
     const { namespace, actionType } = payload || {};
     this.global = true;
-    this.models = { ...this.models, [namespace]: true };
+    this.stores = { ...this.stores, [namespace]: true };
     this.effects = { ...this.effects, [actionType]: true };
   }
 
@@ -28,19 +24,22 @@ class Store {
   hide({ payload }) {
     const { namespace, actionType } = payload || {};
     const effects = { ...this.effects, [actionType]: false };
-    const models = {
-      ...this.models,
-      [namespace]: Object.keys(effects).some((actionType) => {
-        const _namespace = actionType.split("/")[0];
+    const stores = {
+      ...this.stores,
+      // eslint-disable-next-line @typescript-eslint/no-shadow
+      [namespace]: Object.keys(effects).some(actionType => {
+        // eslint-disable-next-line no-underscore-dangle
+        const _namespace = actionType.split('/')[0];
         if (_namespace !== namespace) return false;
         return effects[actionType];
       }),
     };
-    const global = Object.keys(models).some((namespace) => {
-      return models[namespace];
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const global = Object.keys(stores).some(namespace => {
+      return stores[namespace];
     });
     this.global = global;
-    this.models = models;
+    this.stores = stores;
     this.effects = effects;
   }
 }
@@ -50,11 +49,11 @@ function createLoading(opts: { only?: any[]; except?: any[] } = {}) {
   const { only = [], except = [] } = opts;
   if (only.length > 0 && except.length > 0) {
     throw Error(
-      "It is ambiguous to configurate `only` and `except` items at the same time."
+      'It is ambiguous to configurate `only` and `except` items at the same time.',
     );
   }
 
-  function onEffect(effect, { put }, store, actionType) {
+  function onEffect(effect, sagaEffects, store, actionType) {
     const namespace = store[namespaceSymbol];
     if (
       (only.length === 0 && except.length === 0) ||
@@ -66,9 +65,8 @@ function createLoading(opts: { only?: any[]; except?: any[] } = {}) {
         yield effect(...args);
         loadingStore.hide({ payload: { namespace, actionType } });
       };
-    } else {
-      return effect;
     }
+    return effect;
   }
 
   return {

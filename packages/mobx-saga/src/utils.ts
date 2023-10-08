@@ -1,4 +1,5 @@
 import { isPlainObject } from 'is-plain-object';
+
 export { isPlainObject };
 export const isArray = Array.isArray.bind(Array);
 export const isFunction = o => typeof o === 'function';
@@ -11,6 +12,6 @@ export const findIndex = (array, predicate) => {
 
   return -1;
 };
-export const delay = (timeout) => {
+export const delay = timeout => {
   return new Promise(resolve => setTimeout(resolve, timeout));
-}
+};

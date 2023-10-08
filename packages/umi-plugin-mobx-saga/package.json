@@ -1,0 +1,26 @@
+{
+  "name": "umi-plugin-mobx-saga",
+  "version": "1.0.1",
+  "description": "umi plugin with mobx-saga",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "author": "xiaolong<123525906@qq.com>",
+  "license": "MIT",
+  "peerDependencies": {
+    "mobx-react": "7.x",
+    "mobx-saga": "1.x",
+    "react": "16.x",
+    "umi": "3.x"
+  },
+  "keywords": [
+    "umi",
+    "umi-plugin",
+    "mobx",
+    "mobx-saga",
+    "saga"
+  ],
+  "files": [
+    "lib",
+    "es"
+  ]
+}

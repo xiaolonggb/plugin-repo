@@ -1,8 +1,11 @@
-import invariant from "invariant";
-import { isPlainObject } from "./utils";
-import { namespaceSymbol } from './constants'
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable no-param-reassign */
+import invariant from 'invariant';
+import { isPlainObject } from './utils';
+import { namespaceSymbol, PACKAGE_NAME } from './constants';
 
-const hooks = ["extraStore", "onError", "onEffect"];
+const hooks = ['extraStore', 'onError', 'onEffect'];
 
 export function filterHooks(obj) {
   return Object.keys(obj).reduce((memo, key) => {
@@ -14,8 +17,8 @@ export function filterHooks(obj) {
 }
 
 export default class Plugin {
-  constructor() {
-  }
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor() {}
 
   hooks = hooks.reduce((memo, key) => {
     memo[key] = [];
@@ -25,7 +28,7 @@ export default class Plugin {
   use(stores, plugin) {
     invariant(
       isPlainObject(plugin),
-      "plugin.use: plugin should be plain object"
+      'plugin.use: plugin should be plain object',
     );
     const { hooks } = this;
     for (const key in plugin) {
@@ -33,7 +36,10 @@ export default class Plugin {
         invariant(hooks[key], `plugin.use: unknown plugin property: ${key}`);
         if (key === 'extraStore') {
           const extraStore = plugin[key];
-          invariant(!stores[extraStore[namespaceSymbol]], `saga-mobx: store namespace ${extraStore[namespaceSymbol]} is multiple`);
+          invariant(
+            !stores[extraStore[namespaceSymbol]],
+            `${PACKAGE_NAME}: store namespace ${extraStore[namespaceSymbol]} is multiple`,
+          );
           stores[extraStore[namespaceSymbol]] = extraStore;
         }
         hooks[key].push(plugin[key]);
@@ -43,10 +49,10 @@ export default class Plugin {
 
   apply(key, defaultHandler) {
     const { hooks } = this;
-    const validApplyHooks = ["onError"];
+    const validApplyHooks = ['onError'];
     invariant(
       validApplyHooks.indexOf(key) > -1,
-      `plugin.apply: hook ${key} cannot be applied`
+      `plugin.apply: hook ${key} cannot be applied`,
     );
     const fns = hooks[key];
 
